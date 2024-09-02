@@ -24,100 +24,71 @@ Developed by: P G KUSHALI
 RegisterNumber:  212223230110
 */
 
-import pandas as pd
+    
 import numpy as np
-import matplotlib.pyplot as plt
-data=pd.read_csv("ex1.txt",header=None)
-plt.scatter(data[0],data[1])
-plt.xticks(np.arange(5,30,step=5))
-plt.yticks(np.arange(-5,30,step=5))
-plt.xlabel("Population of City(10,000s)")
-plt.ylabel("Profit ($10,000)")
-plt.title("Profit Prediction")
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
 
-def computeCost(X,y,theta):
-    m=len(y) 
-    h=X.dot(theta) 
-    square_err=(h-y)**2
-    return 1/(2*m)*np.sum(square_err) 
+def linear_regression(X, y, learning_rate=0.01, num_iters=1000):
+    # Add a column of ones to X for the intercept term
+    X = np.c_[np.ones(len(X)), X]
 
-data_n=data.values
-m=data_n[:,0].size
-X=np.append(np.ones((m,1)),data_n[:,0].reshape(m,1),axis=1)
-y=data_n[:,1].reshape(m,1)
-theta=np.zeros((2,1))
-computeCost(X,y,theta) 
+    # Initialize theta with zeros
+    theta = np.zeros(X.shape[1]).reshape(-1, 1)
 
-def gradientDescent(X,y,theta,alpha,num_iters):
-    m=len(y)
-    J_history=[] #empty list
-    for i in range(num_iters):
-        predictions=X.dot(theta)
-        error=np.dot(X.transpose(),(predictions-y))
-        descent=alpha*(1/m)*error
-        theta-=descent
-        J_history.append(computeCost(X,y,theta))
-    return theta,J_history
+    # Perform gradient descent
+    for _ in range(num_iters):
+        # Calculate predictions
+        predictions = X.dot(theta).reshape(-1, 1)
 
-theta,J_history = gradientDescent(X,y,theta,0.01,1500)
-print("h(x) ="+str(round(theta[0,0],2))+" + "+str(round(theta[1,0],2))+"x1")
+        # Calculate errors
+        errors = (predictions - y).reshape(-1, 1)
 
-plt.plot(J_history)
-plt.xlabel("Iteration")
-plt.ylabel("$J(\Theta)$")
-plt.title("Cost function using Gradient Descent")
+        # Update theta using gradient descent
+        theta -= learning_rate * (2 / len(X)) * X.T.dot(errors)
 
-plt.scatter(data[0],data[1])
-x_value=[x for x in range(25)]
-y_value=[y*theta[1]+theta[0] for y in x_value]
-plt.plot(x_value,y_value,color="r")
-plt.xticks(np.arange(5,30,step=5))
-plt.yticks(np.arange(-5,30,step=5))
-plt.xlabel("Population of City(10,000s)")
-plt.ylabel("Profit ($10,000)")
-plt.title("Profit Prediction")
+    return theta
 
-def predict(x,theta):
-    predictions=np.dot(theta.transpose(),x)
-    return predictions[0]
+# Read data from CSV file
+data = pd.read_csv('/content/50_Startups.csv', header=None)
 
-predict1=predict(np.array([1,3.5]),theta)*10000
-print("For Population = 35000, we predict a profit of $"+str(round(predict1,0)))
+# Extract features (X) and target variable (y)
+X = data.iloc[1:, :-2].values.astype(float)
+y = data.iloc[1:, -1].values.reshape(-1, 1)
 
-predict2=predict(np.array([1,7]),theta)*10000
-print("For Population = 70000, we predict a profit of $"+str(round(predict2,0)))
+# Standardize features and target variable
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+y_scaled = scaler.fit_transform(y)
+
+# Example usage
+# X_array = np.array([[1, 2], [3, 4], [5, 6], [7, 8]])
+# y_array = np.array([2, 7, 11, 16])
+
+# Learn model parameters
+theta_result = linear_regression(X_scaled, y_scaled)
+
+# Predict target value for a new data point
+new_data = np.array([165349.2, 136897.8, 471784.1]).reshape(-1, 1)
+new_scaled = scaler.fit_transform(new_data)
+
+prediction = np.dot(np.append(1, new_scaled), theta_result)
+prediction = prediction.reshape(-1, 1)
+
+# Inverse transform the prediction to get the original scale
+predicted_value = scaler.inverse_transform(prediction)
+
+print(f"Predicted value: {predicted_value}")
+
 
 ```
 
 ## Output:
+![image](https://github.com/user-attachments/assets/a0ccb46e-52a0-4fd6-b143-356a541d4efb)
 
-## PROFIT PREDICTION:
+![image](https://github.com/user-attachments/assets/4557820d-d9e5-4568-ae3e-e5131556152d)
 
-![image](https://github.com/user-attachments/assets/0d8de954-0f63-4972-9d78-c08241f9371e)
 
-## FUNCTION OUTPUT:
-
-![image](https://github.com/user-attachments/assets/5a515756-0ae4-4f96-bc3f-e0c84a56facb)
-
-## GRADIENT DESCENT:
-
-![image](https://github.com/user-attachments/assets/f48e7a37-400d-46cd-8557-740473b6150e)
-
-## COST FUNCTION USING GRADIENT DESCENT:
-
-![image](https://github.com/user-attachments/assets/fd5a744d-6741-4869-986b-99e1a5c0c6e3)
-
-## LINEAR REGRESSION USING PROFIT PREDICTION:
-
-![image](https://github.com/user-attachments/assets/8511515e-021f-40b2-819a-3f1a722ca93f)
-
-## PROFIT PREDICTION FOR A POPULATION OF 35000:
-
-![image](https://github.com/user-attachments/assets/7b67b5c1-89da-475b-92c1-4ab23de757de)
-
-##  PROFIT PREDICTION FOR A POPULATION OF 70000:
-
-![image](https://github.com/user-attachments/assets/21bf2467-1860-4c1e-a8cb-43d0b4c88aef)
 
 
 ## Result:
